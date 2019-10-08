@@ -29,6 +29,7 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.WishLi
     static class WishListViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener, View.OnClickListener {
         LinearLayout layout;
         TextView nameTextView;
+        TextView reasonTextView;
         TextView dateCreatedTextView;
 
         WishListClickListener listener;
@@ -39,7 +40,9 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.WishLi
             this.listener = listener;
             this.layout = layout;
             nameTextView = layout.findViewById(R.id.placeNameTextView);
+            reasonTextView = layout.findViewById(R.id.reasonTextView);
             dateCreatedTextView = layout.findViewById(R.id.dateCreatedTextView);
+
             layout.setOnClickListener(this);
             layout.setOnLongClickListener(this);
         }
@@ -71,6 +74,7 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.WishLi
     public void onBindViewHolder(@NonNull WishListViewHolder holder, int position) {
         Place place = data.get(position);
         holder.nameTextView.setText(place.getName());
+        holder.reasonTextView.setText(place.getReason());
         holder.dateCreatedTextView.setText("Created on " + place.getDateCreated());
     }
 
