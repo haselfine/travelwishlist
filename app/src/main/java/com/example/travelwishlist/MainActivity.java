@@ -13,6 +13,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.example.travelwishlist.db.Place;
+
 import java.util.ArrayList;
 import java.util.List;
 

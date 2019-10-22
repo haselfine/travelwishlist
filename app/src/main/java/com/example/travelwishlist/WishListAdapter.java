@@ -1,5 +1,6 @@
 package com.example.travelwishlist;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,24 +10,65 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-
-import org.w3c.dom.Text;
+import com.example.travelwishlist.db.Place;
 
 import java.util.List;
 
 public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.WishListViewHolder> {
 
-    private List<Place> data;
+    private final static String TAG = "WISHLIST_ADAPTER";
+
+    interface ListEventListener{
+        void onDeletePlace(int position);
+    }
+
+    private ListEventListener mEventListener;
+
+    private List<Place> mPlaces;
 
     private WishListClickListener listener;
 
-    public WishListAdapter(List<Place> data, WishListClickListener listener){
+    public WishListAdapter(List<Place> data, WishListClickListener listener, ListEventListener eventListener){
         this.listener = listener;
-        this.data = data;
+        this.mPlaces = data;
+        this.mEventListener = eventListener;
 
     }
 
-    static class WishListViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener, View.OnClickListener {
+    void setPlaces(List<Place> places){
+        this.mPlaces = places;
+        notifyDataSetChanged();
+    }
+
+
+    @NonNull
+    @Override
+    public WishListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        LinearLayout layout = (LinearLayout) LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.wish_list_element, parent, false);
+        WishListViewHolder viewHolder = new WishListViewHolder(layout, listener);
+        return viewHolder;
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull WishListViewHolder holder, int position) {
+        if(mPlaces != null){
+            Place place = mPlaces.get(position);
+            holder.bind(place);
+        } else {
+            holder.bind(null);
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        if(mPlaces == null){
+            return 0;
+        }
+        return mPlaces.size();
+    }
+
+    public class WishListViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener, View.OnClickListener {
         LinearLayout layout;
         TextView nameTextView;
         TextView reasonTextView;
@@ -35,7 +77,7 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.WishLi
         WishListClickListener listener;
 
 
-        WishListViewHolder(LinearLayout layout, WishListClickListener listener){
+        public WishListViewHolder(@NonNull LinearLayout layout, WishListClickListener listener){
             super(layout);
             this.listener = listener;
             this.layout = layout;
@@ -57,29 +99,18 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.WishLi
             listener.onListLongClick(getAdapterPosition());
             return true;
         }
-    }
 
-
-
-    @NonNull
-    @Override
-    public WishListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LinearLayout layout = (LinearLayout) LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.wish_list_element, parent, false);
-        WishListViewHolder viewHolder = new WishListViewHolder(layout, listener);
-        return viewHolder;
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull WishListViewHolder holder, int position) {
-        Place place = data.get(position);
-        holder.nameTextView.setText(place.getName());
-        holder.reasonTextView.setText(place.getReason());
-        holder.dateCreatedTextView.setText("Created on " + place.getDateCreated());
-    }
-
-    @Override
-    public int getItemCount() {
-        return data.size();
+        void bind(Place place){
+            Log.d(TAG, "binding place " + place);
+            if(place == null){
+                nameTextView.setText("");
+                reasonTextView.setText("");
+                dateCreatedTextView.setText("");
+            } else {
+                nameTextView.setText(place.getName());
+                reasonTextView.setText(place.getReason());
+                dateCreatedTextView.setText(place.getDate());
+            }
+        }
     }
 }
