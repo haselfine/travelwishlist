@@ -1,25 +1,28 @@
 package com.example.travelwishlist.db;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
-import java.text.DateFormat;
 import java.util.Date;
 
 @Entity
-public class Place {
+public class Place implements Comparable<Place>{
 
+    @NonNull
     @PrimaryKey(autoGenerate = true)
-    private int id;
-    private String name;
-    private Date date;
-    private String reason;
+    private int id; //unique identifier
+    private String name; //name of place
+    private Date date; //date created
+    private String reason; //reason to visit
 
     public Place(){}
 
     @Ignore
-    Place(String name, String reason){
+    public Place(String name, String reason){
+
+
         this.name = name;
         this.date = new Date();
         this.reason = reason;
@@ -37,17 +40,32 @@ public class Place {
         return name;
     }
 
+    public void setName(String name){
+        this.name = name;
+    }
+
     public String getReason() {
         return reason;
     }
 
-    public String getDate(){
-        return DateFormat.getDateInstance().format(date);
+    public void setReason(String reason){
+        this.reason = reason;
     }
 
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public int compareTo(Place place) {
+        return this.name.toLowerCase().compareTo(place.getName().toLowerCase());
+    }
 
     @Override
-    public String toString(){
+    public String toString(){ //string for insertion into database
         return "Place{" +
                 "id=" + id +
                 ", name=" + name +

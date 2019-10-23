@@ -1,97 +1,48 @@
 package com.example.travelwishlist;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
+import android.util.Log;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 
 import com.example.travelwishlist.db.Place;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements WishListClickListener {
+public class MainActivity extends AppCompatActivity {
 
-    private RecyclerView mWishListRecyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
 
-    private Button mAddButton;
-    private EditText mNewPlaceNameEditText;
-    private EditText mReasonEditText;
+    private static final String TAG = "MAIN_ACTIVITY";
 
-    private List<Place> mPlaces;
+    private static final String TAG_WISHLIST = "WishlistFragment";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mPlaces = new ArrayList<>();
+        WishlistFragment wishlistFragment = WishlistFragment.newInstance(); //There's really no reason for it to be a fragment at this point.
+                                                                            //But just in case I need to add fragments later, I'm ready
 
-        mWishListRecyclerView = findViewById(R.id.wish_list);
-        mAddButton = findViewById(R.id.add_place_button);
-        mNewPlaceNameEditText = findViewById(R.id.new_place_name);
-        mReasonEditText = findViewById(R.id.reason);
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
 
-        mWishListRecyclerView.setHasFixedSize(true);
+        ft.add(android.R.id.content, wishlistFragment, TAG_WISHLIST);
+        ft.commit();
 
-        mLayoutManager = new LinearLayoutManager(this);
-        mWishListRecyclerView.setLayoutManager(mLayoutManager);
+        PlaceViewModel placeViewModel = new PlaceViewModel(getApplication());
 
-        mAdapter = new WishListAdapter(mPlaces, this);
-        mWishListRecyclerView.setAdapter(mAdapter);
+        LiveData<List<Place>> wishList = placeViewModel.getAllPlaces();
 
-        mAddButton.setOnClickListener(new View.OnClickListener() {
+        wishList.observe(this, new Observer<List<Place>>() {
             @Override
-            public void onClick(View view) {
-                String newPlace = mNewPlaceNameEditText.getText().toString();
-                String reason = mReasonEditText.getText().toString();
-                if (newPlace.isEmpty()||reason.isEmpty()){
-                    return;
-                }
-
-                mPlaces.add(new Place(newPlace,reason));
-                mAdapter.notifyItemInserted(mPlaces.size() - 1);
-                mNewPlaceNameEditText.getText().clear();
-                mReasonEditText.getText().clear();
+            public void onChanged(List<Place> places) {
+                Log.d(TAG, "Places: " + places);
             }
         });
-    }
-
-    @Override
-    public void onListClick(int position) {
-        Place place = mPlaces.get(position);
-        Uri locationUri = Uri.parse("geo:0,0?q=" + Uri.encode(place.getName()));
-        Intent mapIntent = new Intent(Intent.ACTION_VIEW, locationUri);
-        startActivity(mapIntent);
-
-    }
-
-    @Override
-    public void onListLongClick(int position) {
-        final int itemPosition = position;
-
-        AlertDialog confirmDeleteDialog = new AlertDialog.Builder(this)
-                .setMessage(getString(R.string.delete_place_message, mPlaces.get(position).getName()))
-                .setTitle(getString(R.string.delete_dialog_title))
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        mPlaces.remove(itemPosition);
-                        mAdapter.notifyItemRemoved(itemPosition);
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .create();
-        confirmDeleteDialog.show();
     }
 }

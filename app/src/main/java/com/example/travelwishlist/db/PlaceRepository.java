@@ -9,56 +9,56 @@ import java.util.List;
 
 public class PlaceRepository {
 
-    private PlaceDAO mPlaceDAO;
+    private PlaceDAO placeDAO;
 
-    public PlaceRepository(Application application){
+    public PlaceRepository(Application application){ //this is the communication point for the view model
         PlaceDatabase db = PlaceDatabase.getDatabase(application);
-        mPlaceDAO = db.placeDAO();
+        placeDAO = db.placeDAO();
     }
 
     public LiveData<List<Place>> getAllPlaces(){
-        return mPlaceDAO.getAllPlaces();
+        return placeDAO.getAllPlaces();
     }
 
     public void insert(Place place){
-        new InsertPlaceAsyncTask(mPlaceDAO).execute(place);
+        new InsertPlaceAsyncTask(placeDAO).execute(place);
     }
 
     public void delete(Place place){
-        new DeletePlaceAsyncTask(mPlaceDAO).execute(place);
+        new DeletePlaceAsyncTask(placeDAO).execute(place);
     }
 
     public void update(Place... places){
-        new UpdateAsyncTask(mPlaceDAO).execute(places);
+        new UpdatePlaceAsync(placeDAO).execute(places);
     }
 
     public void insert(Place... places){
-        new InsertPlaceAsyncTask(mPlaceDAO).execute(places);
+        new InsertPlaceAsyncTask(placeDAO).execute(places);
     }
 
     public void delete(Place... places){
-        new DeletePlaceAsyncTask(mPlaceDAO).execute(places);
+        new DeletePlaceAsyncTask(placeDAO).execute(places);
     }
 
-    public void delete(int id){new DeletePlaceIDAsyncTask(mPlaceDAO).execute(id);}
+    public void delete(int id){new DeletePlaceIDAsyncTask(placeDAO).execute(id);}
 
-    private static class UpdateAsyncTask extends AsyncTask<Place, Void, Void> {
+    private static class UpdatePlaceAsync extends AsyncTask<Place, Void, Void> { //queries are performed in the background
 
-        private PlaceDAO asyncTaskDAO;
+        private PlaceDAO placeDAO;
 
-        UpdateAsyncTask(PlaceDAO placeDAO) {
-            this.asyncTaskDAO = placeDAO;
+        UpdatePlaceAsync(PlaceDAO placeDAO) {
+            this.placeDAO = placeDAO;
         }
 
         @Override
         protected Void doInBackground(Place... places) {
-            asyncTaskDAO.update(places);
+            placeDAO.update(places);
             return null;
         }
     }
 
-    private static class InsertPlaceAsyncTask extends AsyncTask<Place, Void, Void>{
-        PlaceDAO dao;
+    private static class InsertPlaceAsyncTask extends AsyncTask<Place, Void, Void>{ //queries in background
+        private PlaceDAO dao;
 
         public InsertPlaceAsyncTask(PlaceDAO dao){
             this.dao = dao;
@@ -66,12 +66,12 @@ public class PlaceRepository {
 
         @Override
         protected Void doInBackground(Place... places){
-            dao.insert(places[0]);
+            dao.insert(places);
             return null;
         }
     }
 
-    private static class DeletePlaceAsyncTask extends AsyncTask<Place, Void, Void>{
+    private static class DeletePlaceAsyncTask extends AsyncTask<Place, Void, Void>{ //in background
         PlaceDAO dao;
 
         public DeletePlaceAsyncTask(PlaceDAO dao){
@@ -85,7 +85,7 @@ public class PlaceRepository {
         }
     }
 
-    private static class DeletePlaceIDAsyncTask extends AsyncTask<Integer, Void, Void>{
+    private static class DeletePlaceIDAsyncTask extends AsyncTask<Integer, Void, Void>{ //in background
 
         PlaceDAO dao;
 

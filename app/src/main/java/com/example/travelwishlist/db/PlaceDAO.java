@@ -10,7 +10,7 @@ import androidx.room.Update;
 import java.util.List;
 
 @Dao
-public interface PlaceDAO {
+public interface PlaceDAO { //queries for database
 
     @Query("SELECT * FROM place ORDER BY UPPER(name) DESC")
     LiveData<List<Place>> getAllPlaces();

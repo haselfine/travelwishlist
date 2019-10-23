@@ -1,5 +1,6 @@
 package com.example.travelwishlist;
 
+import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,24 +19,17 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.WishLi
 
     private final static String TAG = "WISHLIST_ADAPTER";
 
-    interface ListEventListener{
-        void onDeletePlace(int position);
-    }
-
-    private ListEventListener mEventListener;
 
     private List<Place> mPlaces;
 
-    private WishListClickListener listener;
+    private WishListListener listener;
 
-    public WishListAdapter(List<Place> data, WishListClickListener listener, ListEventListener eventListener){
+    public WishListAdapter(Context context, WishListListener listener){
         this.listener = listener;
-        this.mPlaces = data;
-        this.mEventListener = eventListener;
 
     }
 
-    void setPlaces(List<Place> places){
+    void setPlaces(List<Place> places){ //tells app that data has changed
         this.mPlaces = places;
         notifyDataSetChanged();
     }
@@ -51,7 +45,7 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.WishLi
     }
 
     @Override
-    public void onBindViewHolder(@NonNull WishListViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull WishListViewHolder holder, int position) { //binds the recycler items to the view, I believe?
         if(mPlaces != null){
             Place place = mPlaces.get(position);
             holder.bind(place);
@@ -69,33 +63,32 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.WishLi
     }
 
     public class WishListViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener, View.OnClickListener {
-        LinearLayout layout;
+
         TextView nameTextView;
         TextView reasonTextView;
         TextView dateCreatedTextView;
 
-        WishListClickListener listener;
+        WishListListener listener;
 
 
-        public WishListViewHolder(@NonNull LinearLayout layout, WishListClickListener listener){
-            super(layout);
+        public WishListViewHolder(@NonNull View itemView, WishListListener listener){
+            super(itemView);
             this.listener = listener;
-            this.layout = layout;
-            nameTextView = layout.findViewById(R.id.placeNameTextView);
-            reasonTextView = layout.findViewById(R.id.reasonTextView);
-            dateCreatedTextView = layout.findViewById(R.id.dateCreatedTextView);
+            nameTextView = itemView.findViewById(R.id.placeNameTextView);
+            reasonTextView = itemView.findViewById(R.id.reasonTextView);
+            dateCreatedTextView = itemView.findViewById(R.id.dateCreatedTextView);
 
-            layout.setOnClickListener(this);
-            layout.setOnLongClickListener(this);
+            itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
         }
 
         @Override
-        public void onClick(View view){
+        public void onClick(View view){ //tells app that short click has been performed
             listener.onListClick(getAdapterPosition());
         }
 
         @Override
-        public boolean onLongClick(View view) {
+        public boolean onLongClick(View view) { //tells app that long click has been performed
             listener.onListLongClick(getAdapterPosition());
             return true;
         }
@@ -106,10 +99,10 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.WishLi
                 nameTextView.setText("");
                 reasonTextView.setText("");
                 dateCreatedTextView.setText("");
-            } else {
+            } else { //sets text for each recycler item
                 nameTextView.setText(place.getName());
                 reasonTextView.setText(place.getReason());
-                dateCreatedTextView.setText(place.getDate());
+                dateCreatedTextView.setText(place.getDate().toString());
             }
         }
     }
